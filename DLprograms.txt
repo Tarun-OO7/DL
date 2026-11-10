@@ -1,0 +1,1055 @@
+# program 1 deep forward ANN using back propagation using a sequential dataset
+
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+
+X, y = load_iris(return_X_y = True)
+
+X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.4)
+
+
+model = Sequential()
+
+
+for i in range(3):
+  model.add(Dense(2, input_shape = (4,)))
+  model.add(Activation('sigmoid'))
+  model.add(Dense(1))
+  model.add(Activation('sigmoid'))
+
+
+model.compile(
+    loss= 'mean_squared_error',
+    optimizer='sgd',
+    metrics=['accuracy']
+)
+
+
+model.summary()
+model.fit(X_train, y_train,epochs=5)
+score = model.evaluate(X_test,y_test)
+print(score)
+
+
+# program 2
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from sklearn.metrics import classification_report
+
+# Load MNIST
+(X_train, y_train), (X_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+# Print shapes
+print("Shape of X_train:", X_train.shape)
+print("Shape of y_train:", y_train.shape)
+print("Shape of X_test:", X_test.shape)
+print("Shape of y_test:", y_test.shape)
+
+# Display first 10 images
+plt.figure(figsize=(12, 6))
+for i in range(10):
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(X_train[i])
+    plt.title(y_train[i])
+    plt.axis('off')
+plt.show()
+
+# Reshape and normalize
+X_train = X_train.reshape(60000, 784).astype("float32") / 255
+X_test = X_test.reshape(10000, 784).astype("float32") / 255
+
+print("New shape of X_train:", X_train.shape)
+print("New shape of X_test:", X_test.shape)
+
+# Create Deep Feed Forward Neural Network
+model = Sequential([
+    Dense(128, activation='relu', kernel_initializer='HeNormal', input_shape=(784,)),
+    Dense(64, activation='relu', kernel_initializer='HeNormal'),
+    Dense(32, activation='relu', kernel_initializer='HeNormal'),
+    Dense(10, activation='softmax')
+])
+
+# Compile
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train
+model.fit(X_train, y_train, batch_size=10, epochs=5)
+
+# Predictions
+pred_train = np.argmax(model.predict(X_train), axis=1)
+pred_test = np.argmax(model.predict(X_test), axis=1)
+
+# Model summary
+print("\nModel Summary")
+model.summary()
+
+# Evaluation
+print("\n--------- Evaluation on Training Data ---------")
+print(classification_report(y_train, pred_train))
+
+print("\n--------- Evaluation on Test Data ---------")
+print(classification_report(y_test, pred_test))
+
+
+
+
+# program 3
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.datasets import fashion_mnist
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from keras.layers import Activation, Flatten, Dense
+from keras.utils import to_categorical
+
+# Load data
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+# Reshape and normalize
+train_X = train_X.reshape(-1, 28, 28, 1) / 255.0
+test_X = test_X.reshape(-1, 28, 28, 1) / 255.0
+
+# One-hot encoding
+train_Y = to_categorical(train_Y, 10)
+test_Y = to_categorical(test_Y, 10)
+
+# CNN model
+model = Sequential()
+
+model.add(Conv2D(256, (3,3), padding='same', input_shape=(28,28,1)))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(MaxPooling2D((2,2)))
+
+model.add(BatchNormalization())
+model.add(Conv2D(128, (3,3), padding='same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D((2,2)))
+
+model.add(BatchNormalization())
+model.add(Conv2D(64, (3,3), padding='same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D((2,2)))
+
+model.add(Conv2D(28, (3,3), padding='same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D((2,2)))
+
+model.add(Flatten())
+model.add(Dense(64))
+model.add(Dense(10, activation='softmax'))
+
+# Compile
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train
+model.fit(train_X, train_Y, epochs=5, batch_size=64)
+
+# Test
+loss, acc = model.evaluate(test_X, test_Y)
+print("Test loss:", loss)
+print("Test accuracy:", acc)
+
+# Prediction
+predictions = model.predict(test_X)
+print(np.argmax(predictions[0]))
+
+# Display image
+plt.imshow(test_X[0].reshape(28,28), cmap='gray')
+plt.show()
+
+
+
+
+
+# program 4.1
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.datasets import fashion_mnist
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.utils import to_categorical
+
+# Load data
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+train_X = train_X.reshape(-1, 28, 28, 1).astype('float32') / 255
+test_X = test_X.reshape(-1, 28, 28, 1).astype('float32') / 255
+
+train_Y = to_categorical(train_Y, 10)
+test_Y = to_categorical(test_Y, 10)
+
+# CNN
+model = Sequential([
+    Conv2D(32, (3,3), activation='relu', padding='same',
+           input_shape=(28,28,1)),
+    MaxPooling2D((2,2)),
+
+    Conv2D(64, (3,3), activation='relu', padding='same'),
+    MaxPooling2D((2,2)),
+
+    Conv2D(128, (3,3), activation='relu', padding='same'),
+    Conv2D(128, (3,3), activation='relu', padding='same'),
+
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.fit(
+    train_X, train_Y,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+loss, acc = model.evaluate(test_X, test_Y)
+print("Test Loss:", loss)
+print("Test Accuracy:", acc)
+
+prediction = model.predict(test_X)
+plt.imshow(test_X[0].reshape(28,28), cmap='gray')
+plt.title(f"Predicted: {np.argmax(prediction[0])}")
+plt.axis('off')
+plt.show()
+
+
+
+
+# program 4.2
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.datasets import fashion_mnist
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.utils import to_categorical
+from keras import regularizers
+
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+train_X = train_X.reshape(-1,28,28,1).astype('float32') / 255
+test_X = test_X.reshape(-1,28,28,1).astype('float32') / 255
+
+train_Y = to_categorical(train_Y, 10)
+test_Y = to_categorical(test_Y, 10)
+
+l1 = regularizers.l1(0.001)
+
+model = Sequential([
+    Conv2D(32, (3,3), padding='same',
+           kernel_regularizer=l1, activation='relu',
+           input_shape=(28,28,1)),
+    MaxPooling2D((2,2)),
+
+    Conv2D(64, (3,3), padding='same',
+           kernel_regularizer=l1, activation='relu'),
+    MaxPooling2D((2,2)),
+
+    Conv2D(128, (3,3), padding='same',
+           kernel_regularizer=l1, activation='relu'),
+
+    Conv2D(128, (3,3), padding='same',
+           kernel_regularizer=l1, activation='relu'),
+
+    Flatten(),
+    Dense(128, activation='relu', kernel_regularizer=l1),
+    Dropout(0.5),
+    Dense(10, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.fit(
+    train_X, train_Y,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+loss, acc = model.evaluate(test_X, test_Y)
+print("Test Loss:", loss)
+print("Test Accuracy:", acc)
+
+prediction = model.predict(test_X)
+plt.imshow(test_X[0].reshape(28,28), cmap='gray')
+plt.title(f"Predicted: {np.argmax(prediction[0])}")
+plt.axis('off')
+plt.show()
+
+
+
+
+# program 4.3
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.datasets import fashion_mnist
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.utils import to_categorical
+from keras import regularizers
+
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+train_X = train_X.reshape(-1,28,28,1).astype('float32') / 255
+test_X = test_X.reshape(-1,28,28,1).astype('float32') / 255
+
+train_Y = to_categorical(train_Y, 10)
+test_Y = to_categorical(test_Y, 10)
+
+l2 = regularizers.l2(0.001)
+
+model = Sequential([
+    Conv2D(32, (3,3), padding='same',
+           kernel_regularizer=l2, activation='relu',
+           input_shape=(28,28,1)),
+    MaxPooling2D((2,2)),
+
+    Conv2D(64, (3,3), padding='same',
+           kernel_regularizer=l2, activation='relu'),
+    MaxPooling2D((2,2)),
+
+    Conv2D(128, (3,3), padding='same',
+           kernel_regularizer=l2, activation='relu'),
+
+    Conv2D(128, (3,3), padding='same',
+           kernel_regularizer=l2, activation='relu'),
+
+    Flatten(),
+    Dense(128, activation='relu', kernel_regularizer=l2),
+    Dense(10, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.fit(
+    train_X, train_Y,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+loss, acc = model.evaluate(test_X, test_Y)
+print("Test Loss:", loss)
+print("Test Accuracy:", acc)
+
+prediction = model.predict(test_X)
+plt.imshow(test_X[0].reshape(28,28), cmap='gray')
+plt.title(f"Predicted: {np.argmax(prediction[0])}")
+plt.axis('off')
+plt.show()
+
+
+
+
+
+# program 4.4
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.datasets import fashion_mnist
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.utils import to_categorical
+
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+train_X = train_X.reshape(-1,28,28,1).astype('float32') / 255
+test_X = test_X.reshape(-1,28,28,1).astype('float32') / 255
+
+train_Y = to_categorical(train_Y, 10)
+test_Y = to_categorical(test_Y, 10)
+
+model = Sequential([
+    Conv2D(32, (3,3), padding='same',
+           activation='relu', input_shape=(28,28,1)),
+    MaxPooling2D((2,2)),
+
+    Conv2D(64, (3,3), padding='same', activation='relu'),
+    MaxPooling2D((2,2)),
+
+    Conv2D(128, (3,3), padding='same', activation='relu'),
+    Conv2D(128, (3,3), padding='same', activation='relu'),
+
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.5),
+    Dense(10, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.fit(
+    train_X, train_Y,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+loss, acc = model.evaluate(test_X, test_Y)
+print("Test Loss:", loss)
+print("Test Accuracy:", acc)
+
+prediction = model.predict(test_X)
+plt.imshow(test_X[0].reshape(28,28), cmap='gray')
+plt.title(f"Predicted: {np.argmax(prediction[0])}")
+plt.axis('off')
+plt.show()
+
+
+
+
+# program 4.5
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.datasets import fashion_mnist
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.utils import to_categorical
+from keras import regularizers
+
+(train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
+
+train_X = train_X.reshape(-1,28,28,1).astype('float32') / 255
+test_X = test_X.reshape(-1,28,28,1).astype('float32') / 255
+
+train_Y = to_categorical(train_Y, 10)
+test_Y = to_categorical(test_Y, 10)
+
+l2 = regularizers.l2(0.001)
+
+model = Sequential([
+    Conv2D(32, (3,3), padding='same',
+           kernel_regularizer=l2,
+           activation='relu',
+           input_shape=(28,28,1)),
+    MaxPooling2D((2,2)),
+
+    Conv2D(64, (3,3), padding='same',
+           kernel_regularizer=l2,
+           activation='relu'),
+    MaxPooling2D((2,2)),
+
+    Conv2D(128, (3,3), padding='same',
+           kernel_regularizer=l2,
+           activation='relu'),
+
+    Conv2D(128, (3,3), padding='same',
+           kernel_regularizer=l2,
+           activation='relu'),
+
+    Flatten(),
+    Dense(128, activation='relu', kernel_regularizer=l2),
+    Dropout(0.5),
+    Dense(10, activation='softmax')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.fit(
+    train_X, train_Y,
+    epochs=10,
+    batch_size=64,
+    validation_split=0.1
+)
+
+loss, acc = model.evaluate(test_X, test_Y)
+print("Test Loss:", loss)
+print("Test Accuracy:", acc)
+
+prediction = model.predict(test_X)
+
+plt.imshow(test_X[0].reshape(28,28), cmap='gray')
+plt.title(f"Predicted: {np.argmax(prediction[0])}")
+plt.axis('off')
+plt.show()
+
+
+
+
+
+
+
+# program 5
+
+import torch
+import requests
+import matplotlib.pyplot as plt
+from PIL import Image
+from transformers import BlipProcessor, BlipForConditionalGeneration
+
+# Image
+url = "https://storage.googleapis.com/sfr-vision-language-research/BLIP/demo.jpg"
+image = Image.open(requests.get(url, stream=True).raw).convert("RGB")
+
+# Display image
+plt.imshow(image)
+plt.axis("off")
+plt.title("Input Image")
+plt.show()
+
+# Load model
+processor = BlipProcessor.from_pretrained(
+    "Salesforce/blip-image-captioning-base"
+)
+model = BlipForConditionalGeneration.from_pretrained(
+    "Salesforce/blip-image-captioning-base"
+)
+
+# Prepare image
+inputs = processor(image, return_tensors="pt")
+
+# Generate caption
+with torch.no_grad():
+    output = model.generate(**inputs)
+
+caption = processor.decode(output[0], skip_special_tokens=True)
+
+print("Generated Caption:")
+print(caption)
+
+
+
+
+# program 6
+
+import numpy as np
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense, Dropout
+from tensorflow.keras.optimizers import Adam
+
+np.random.seed(42)
+
+# Load dataset
+(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=10000)
+
+# Pad sequences
+max_len = 500
+x_train = pad_sequences(x_train, maxlen=max_len)
+x_test = pad_sequences(x_test, maxlen=max_len)
+
+# Build model
+model = Sequential([
+    Embedding(input_dim=10000, output_dim=128, input_length=max_len),
+    Bidirectional(LSTM(128)),
+    Dropout(0.5),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer=Adam(), loss='binary_crossentropy', metrics=['accuracy'])
+model.summary()
+
+# Train and evaluate
+model.fit(x_train, y_train, epochs=5, batch_size=64,
+          validation_data=(x_test, y_test))
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print(f"Test accuracy: {test_acc * 100:.2f}%")
+
+# Predict a sample
+sample_index = 100
+prediction = model.predict(np.array([x_test[sample_index]]), verbose=0)
+print(f"Prediction for sample {sample_index}: "
+      f"{'Positive' if prediction[0][0] > 0.5 else 'Negative'}")
+
+
+
+
+# program 7
+
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+# Load and normalize MNIST
+(x_train, _), (x_test, _) = tf.keras.datasets.mnist.load_data()
+x_train = x_train.astype('float32').reshape(-1, 28, 28, 1) / 255
+x_test = x_test.astype('float32').reshape(-1, 28, 28, 1) / 255
+
+# Build autoencoder
+input_img = layers.Input(shape=(28, 28, 1))
+x = layers.Conv2D(16, 3, activation='relu', padding='same')(input_img)
+x = layers.MaxPooling2D(2, padding='same')(x)
+x = layers.Conv2D(8, 3, activation='relu', padding='same')(x)
+encoded = layers.MaxPooling2D(2, padding='same')(x)
+
+x = layers.Conv2D(8, 3, activation='relu', padding='same')(encoded)
+x = layers.UpSampling2D(2)(x)
+x = layers.Conv2D(16, 3, activation='relu', padding='same')(x)
+x = layers.UpSampling2D(2)(x)
+decoded = layers.Conv2D(1, 3, activation='sigmoid', padding='same')(x)
+
+autoencoder = models.Model(input_img, decoded)
+autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+
+# Train
+autoencoder.fit(x_train, x_train, epochs=10, batch_size=128,
+                shuffle=True, validation_data=(x_test, x_test))
+
+# Reconstruct and display 10 images
+decoded_imgs = autoencoder.predict(x_test)
+plt.figure(figsize=(20, 4))
+
+for i in range(10):
+    for j, img, title in [
+        (1, x_test[i].reshape(28, 28), 'Original'),
+        (11, decoded_imgs[i].reshape(28, 28), 'Reconstructed')
+    ]:
+        ax = plt.subplot(2, 10, i + j)
+        plt.imshow(img, cmap='gray')
+        plt.title(title)
+        plt.axis('off')
+
+plt.tight_layout()
+plt.show()
+
+
+
+# program 8
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchvision
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+latent_size, hidden_size, image_size = 64, 256, 784
+batch_size, num_epochs, learning_rate = 100, 10, 0.0002
+
+# Load MNIST
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+])
+mnist = datasets.MNIST('data/', train=True, transform=transform, download=True)
+data_loader = DataLoader(mnist, batch_size=batch_size, shuffle=True)
+
+# Generator
+class Generator(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(latent_size, hidden_size), nn.LeakyReLU(0.2),
+            nn.Linear(hidden_size, hidden_size), nn.LeakyReLU(0.2),
+            nn.Linear(hidden_size, image_size), nn.Tanh()
+        )
+
+    def forward(self, z):
+        return self.model(z)
+
+# Discriminator
+class Discriminator(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(image_size, hidden_size), nn.LeakyReLU(0.2),
+            nn.Linear(hidden_size, hidden_size), nn.LeakyReLU(0.2),
+            nn.Linear(hidden_size, 1), nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+G, D = Generator().to(device), Discriminator().to(device)
+criterion = nn.BCELoss()
+g_optimizer = optim.Adam(G.parameters(), lr=learning_rate)
+d_optimizer = optim.Adam(D.parameters(), lr=learning_rate)
+
+# Display generated images
+def show_images(images):
+    grid = torchvision.utils.make_grid(
+        images.reshape(-1, 1, 28, 28), nrow=10, normalize=True
+    )
+    plt.figure(figsize=(10, 4))
+    plt.imshow(grid.cpu().permute(1, 2, 0))
+    plt.axis('off')
+    plt.show()
+
+# Training
+for epoch in range(num_epochs):
+    for images, _ in data_loader:
+        n = images.size(0)
+        images = images.reshape(n, -1).to(device)
+        real_labels = torch.ones(n, 1, device=device)
+        fake_labels = torch.zeros(n, 1, device=device)
+
+        # Train discriminator
+        real_loss = criterion(D(images), real_labels)
+        z = torch.randn(n, latent_size, device=device)
+        fake_images = G(z)
+        fake_loss = criterion(D(fake_images.detach()), fake_labels)
+        d_loss = real_loss + fake_loss
+
+        D.zero_grad()
+        d_loss.backward()
+        d_optimizer.step()
+
+        # Train generator
+        z = torch.randn(n, latent_size, device=device)
+        fake_images = G(z)
+        g_loss = criterion(D(fake_images), real_labels)
+
+        G.zero_grad()
+        g_loss.backward()
+        g_optimizer.step()
+
+    print(f"Epoch [{epoch+1}/{num_epochs}], "
+          f"d_loss: {d_loss.item():.4f}, g_loss: {g_loss.item():.4f}")
+
+    if (epoch + 1) % 10 == 0:
+        with torch.no_grad():
+            show_images(G(torch.randn(100, latent_size, device=device)))
+
+print("Training completed.")
+
+
+
+
+
+
+# Program 9
+
+import sys
+import subprocess
+import importlib.metadata as metadata
+
+OPENCV_VERSION = "4.14.0.94"
+
+OPENCV_PACKAGES = [
+    "opencv-python",
+    "opencv-contrib-python",
+    "opencv-python-headless",
+    "opencv-contrib-python-headless",
+]
+
+
+def setup_opencv():
+    # Check all installed OpenCV package variants
+    installed = {}
+
+    for package in OPENCV_PACKAGES:
+        try:
+            installed[package] = metadata.version(package)
+        except metadata.PackageNotFoundError:
+            pass
+
+    correct_install = (
+        installed == {"opencv-python-headless": OPENCV_VERSION}
+    )
+
+    # If OpenCV was already imported, check whether the old module
+    # is still loaded in the current Python runtime.
+    import sys
+
+    loaded_cv2 = sys.modules.get("cv2")
+    loaded_version = (
+        getattr(loaded_cv2, "__version__", "")
+        if loaded_cv2 is not None
+        else ""
+    )
+
+    if correct_install:
+        if loaded_version and not loaded_version.startswith("4.14.0"):
+            print("OpenCV 4.x is installed, but the old cv2 module is loaded.")
+            print("Restart Runtime → Restart session, then rerun this cell.")
+            return False
+
+        print("Compatible OpenCV version is already installed.")
+        return True
+
+    print("Removing conflicting OpenCV packages...")
+
+    subprocess.run(
+        [
+            sys.executable, "-m", "pip", "uninstall", "-y",
+            *OPENCV_PACKAGES
+        ],
+        check=True
+    )
+
+    print("Installing OpenCV", OPENCV_VERSION, "...")
+
+    subprocess.run(
+        [
+            sys.executable, "-m", "pip", "install",
+            "--no-deps",
+            f"opencv-python-headless=={OPENCV_VERSION}"
+        ],
+        check=True
+    )
+
+    print("\nOpenCV installation completed.")
+    print("NOW select Runtime → Restart session.")
+    print("Then rerun this SAME cell to start face detection.")
+
+    return False
+
+
+def main():
+    if not setup_opencv():
+        return
+
+    # Import OpenCV only after the environment check
+    import os
+    import cv2
+    import urllib.request
+    import base64
+    import io
+    import numpy as np
+
+    from PIL import Image
+    from IPython.display import display, HTML
+    from google.colab import output
+    from google.colab.patches import cv2_imshow
+
+    print("\nOpenCV version:", cv2.__version__)
+    print(
+        "CascadeClassifier available:",
+        hasattr(cv2, "CascadeClassifier")
+    )
+
+    if not hasattr(cv2, "CascadeClassifier"):
+        raise RuntimeError(
+            "CascadeClassifier is missing. Restart the runtime "
+            "and rerun this cell."
+        )
+
+    # --------------------------------------------------------
+    # Download Haar Cascade XML
+    # --------------------------------------------------------
+
+    cascade_path = "/content/haarcascade_frontalface_default.xml"
+
+    cascade_url = (
+        "https://raw.githubusercontent.com/opencv/opencv/4.x/"
+        "data/haarcascades/haarcascade_frontalface_default.xml"
+    )
+
+    if (
+        not os.path.exists(cascade_path)
+        or os.path.getsize(cascade_path) < 1000
+    ):
+        print("Downloading Haar Cascade XML...")
+        urllib.request.urlretrieve(cascade_url, cascade_path)
+
+    face_cascade = cv2.CascadeClassifier(cascade_path)
+
+    if face_cascade.empty():
+        raise RuntimeError(
+            "Could not load Haar Cascade XML. "
+            "Check the downloaded file and internet connection."
+        )
+
+    print("Haar Cascade loaded successfully.")
+
+    # --------------------------------------------------------
+    # Process captured webcam image
+    # --------------------------------------------------------
+
+    def capture_webcam_image(data_url):
+        try:
+            image_data = data_url.split(",", 1)[1]
+            image_bytes = base64.b64decode(image_data)
+
+            # Pillow provides an RGB image
+            rgb_image = np.array(
+                Image.open(io.BytesIO(image_bytes)).convert("RGB")
+            )
+
+            # Convert RGB to BGR for OpenCV
+            frame = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            faces = face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30)
+            )
+
+            print("Number of faces detected:", len(faces))
+
+            for (x, y, w, h) in faces:
+                cv2.rectangle(
+                    frame,
+                    (x, y),
+                    (x + w, y + h),
+                    (0, 255, 0),
+                    2
+                )
+
+            cv2_imshow(frame)
+
+        except Exception as error:
+            print("Face detection error:", repr(error))
+
+    # Register callback for the browser webcam
+    output.register_callback(
+        "notebook.capture_webcam_image",
+        capture_webcam_image
+    )
+
+    # --------------------------------------------------------
+    # Webcam interface
+    # --------------------------------------------------------
+
+    display(HTML("""
+    <div style="font-family:Arial,sans-serif">
+        <video id="video" width="640" height="480"
+               autoplay playsinline
+               style="max-width:100%;border:1px solid #888;
+                      border-radius:8px">
+        </video>
+
+        <br><br>
+
+        <button id="capture"
+                style="padding:10px 16px;cursor:pointer">
+            Capture Image and Detect Faces
+        </button>
+
+        <span id="status" style="margin-left:10px"></span>
+    </div>
+
+    <script>
+    (async () => {
+        const video = document.getElementById("video");
+        const button = document.getElementById("capture");
+        const status = document.getElementById("status");
+
+        try {
+            const stream =
+                await navigator.mediaDevices.getUserMedia({
+                    video: true
+                });
+
+            video.srcObject = stream;
+            await video.play();
+            status.textContent = "Camera ready";
+        } catch (error) {
+            status.textContent = "Camera error: " + error.message;
+            return;
+        }
+
+        button.onclick = async () => {
+            if (!video.videoWidth || !video.videoHeight) {
+                status.textContent = "Camera is not ready.";
+                return;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            canvas.getContext("2d").drawImage(
+                video, 0, 0, canvas.width, canvas.height
+            );
+
+            const dataURL = canvas.toDataURL("image/jpeg");
+            status.textContent = "Detecting faces...";
+
+            try {
+                await google.colab.kernel.invokeFunction(
+                    "notebook.capture_webcam_image",
+                    [dataURL],
+                    {}
+                );
+                status.textContent = "Detection complete.";
+            } catch (error) {
+                status.textContent =
+                    "Processing error: " + error.message;
+            }
+        };
+    })();
+    </script>
+    """))
+
+
+main()
+
+
+
+
+
+#program 10
+import tensorflow as tf
+from tensorflow.keras.datasets import imdb
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
+
+# Load data
+vocab_size, maxlen, embedding_dim = 10000, 500, 32
+(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=vocab_size)
+x_train = pad_sequences(x_train, maxlen=maxlen)
+x_test = pad_sequences(x_test, maxlen=maxlen)
+
+# Build model
+model = Sequential([
+    Embedding(vocab_size, embedding_dim, input_length=maxlen),
+    SimpleRNN(64),
+    Dense(1, activation='sigmoid')
+])
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.summary()
+
+# Train and evaluate
+model.fit(x_train, y_train, epochs=5, batch_size=64, validation_split=0.2)
+loss, acc = model.evaluate(x_test, y_test)
+print(f"Test Accuracy: {acc * 100:.2f}%")
+
+# Prepare word index
+word_index = {k: v + 3 for k, v in imdb.get_word_index().items()}
+word_index.update({"<PAD>": 0, "<START>": 1, "<UNK>": 2, "<UNUSED>": 3})
+
+# Encode and predict a sample review
+sample_review = "This movie was fantastic! The story was compelling and the acting was great."
+encoded = [1] + [word_index.get(w, 2) for w in sample_review.lower().split()]
+processed = pad_sequences([encoded], maxlen=maxlen)
+prediction = model.predict(processed, verbose=0)[0][0]
+
+sentiment = "Positive" if prediction > 0.5 else "Negative"
+print(f"\nSample review: {sample_review}")
+print(f"Predicted Sentiment: {sentiment} ({prediction:.4f})")
+
